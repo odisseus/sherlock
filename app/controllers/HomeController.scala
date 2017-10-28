@@ -68,14 +68,10 @@ class HomeController @Inject() (cc:MessagesControllerComponents)
       }
   }
 
-  /**
-   * A generic operation on the temporary file that deletes the temp file after completion.
-   */
-  private def operateOnTempFile(file: File) = {
+  private def operateOnFile(file: File) = {
     val size = Files.size(file.toPath)
     logger.info(s"size = ${size}")
     val parsedCsv = csvFileParseService.parse(file)
-    Files.deleteIfExists(file.toPath)
     parsedCsv
   }
 
@@ -88,13 +84,16 @@ class HomeController @Inject() (cc:MessagesControllerComponents)
     val fileOption = request.body.file("Select file").map {
       case FilePart(key, filename, contentType, file) =>
         logger.info(s"key = ${key}, filename = ${filename}, contentType = ${contentType}, file = $file")
-        val data = operateOnTempFile(file)
-        data
+        file
     }
-    Found("/columns")
+    fileOption.fold[Result](BadRequest){file =>
+      Found(s"/columns/${file.getName}")
+    }
   }
 
-  def selectColumns = Action { implicit request =>
-    Ok(views.html.columns(CsvFile(List("col1"), List(List("field1", "field2", "field3")))))
+  def selectColumns(path: String) = Action { implicit request =>
+    val file = new File(s"/tmp/$path")
+    val parsedCsv = operateOnFile(file)
+    Ok(views.html.columns(parsedCsv))
   }
 }
