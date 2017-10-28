@@ -93,6 +93,6 @@ class HomeController @Inject() (cc:MessagesControllerComponents)
   }
 
   def selectColumns = Action { implicit request =>
-    Ok(views.html.columns(CsvFile(Seq("col1"), Seq(Seq("field1", "field2", "field3")))))
+    Ok(views.html.columns(CsvFile(Seq("col1", "col2", "col3"), Seq(Seq("field1", "field2", "field3")))))
   }
 }
