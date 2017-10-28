@@ -76,7 +76,7 @@ class HomeController @Inject() (cc:MessagesControllerComponents)
     logger.info(s"size = ${size}")
     val parsedCsv = csvFileParseService.parse(file)
     Files.deleteIfExists(file.toPath)
-    size
+    parsedCsv
   }
 
   /**
@@ -91,8 +91,7 @@ class HomeController @Inject() (cc:MessagesControllerComponents)
         val data = operateOnTempFile(file)
         data
     }
-
-    Ok(s"file size = ${fileOption.getOrElse("no file")}")
+    Found("/columns")
   }
 
   def selectColumns = Action { implicit request =>
