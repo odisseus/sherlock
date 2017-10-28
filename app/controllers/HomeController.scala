@@ -96,6 +96,11 @@ class HomeController @Inject() (cc:MessagesControllerComponents)
   }
 
   def selectColumns = Action { implicit request =>
-    Ok(views.html.columns(CsvFile(List("col1"), List(List("field1", "field2", "field3")))))
+    Ok(views.html.columns(CsvFile(List("col1", "col2", "col3"), List(List("field1", "field2", "field3")))))
+  }
+
+  def computeResults(addressColumns: String) = Action {
+    // TODO: implement
+    Ok(addressColumns) // split it
   }
 }
