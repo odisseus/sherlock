@@ -16,8 +16,8 @@ import play.api.mvc._
 import play.core.parsers.Multipart.FileInfo
 
 import scala.concurrent.{ExecutionContext, Future}
-
 import model.CsvFile
+import services.CsvFileParseService
 
 case class FormData(name: String)
 
@@ -30,6 +30,8 @@ class HomeController @Inject() (cc:MessagesControllerComponents)
   extends MessagesAbstractController(cc) {
 
   private val logger = Logger(this.getClass)
+
+  private val csvFileParseService = new CsvFileParseService
 
   val form = Form(
     mapping(
@@ -72,6 +74,7 @@ class HomeController @Inject() (cc:MessagesControllerComponents)
   private def operateOnTempFile(file: File) = {
     val size = Files.size(file.toPath)
     logger.info(s"size = ${size}")
+    val parsedCsv = csvFileParseService.parse(file)
     Files.deleteIfExists(file.toPath)
     size
   }
@@ -93,6 +96,6 @@ class HomeController @Inject() (cc:MessagesControllerComponents)
   }
 
   def selectColumns = Action { implicit request =>
-    Ok(views.html.columns(CsvFile(Seq("col1"), Seq(Seq("field1", "field2", "field3")))))
+    Ok(views.html.columns(CsvFile(List("col1"), List(List("field1", "field2", "field3")))))
   }
 }
