@@ -1,4 +1,4 @@
-name := """play-scala-fileupload-example"""
+name := """sherlock"""
 
 version := "1.0-SNAPSHOT"
 
