@@ -5,5 +5,5 @@ $("#submitColumns").click(function () {
         columns.push($(this).val());
     });
     var joined = columns.join(",");
-    window.location = "results?addressColumns=" + joined;
+    window.location = window.location.pathname.replace("/columns", "/results") + "?addressColumns=" + joined;
 });
