@@ -9,3 +9,5 @@ scalaVersion := "2.12.2"
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" % Test
 libraryDependencies += ws
 libraryDependencies += guice
+
+libraryDependencies += "com.github.tototoshi" %% "scala-csv" % "1.3.5"
