@@ -17,6 +17,8 @@ import play.core.parsers.Multipart.FileInfo
 
 import scala.concurrent.{ExecutionContext, Future}
 
+import model.CsvFile
+
 case class FormData(name: String)
 
 /**
@@ -90,4 +92,7 @@ class HomeController @Inject() (cc:MessagesControllerComponents)
     Ok(s"file size = ${fileOption.getOrElse("no file")}")
   }
 
+  def selectColumns = Action { implicit request =>
+    Ok(views.html.columns(CsvFile(Seq("col1"), Seq(Seq("field1", "field2", "field3")))))
+  }
 }

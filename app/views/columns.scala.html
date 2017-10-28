@@ -1,0 +1,15 @@
+@import model.CsvFile
+
+@(csvFile: CsvFile)
+
+    @main("Select columns") {
+        <table>
+        @for(row: Seq[String] <- csvFile.rows) {
+            <tr>
+            @for(field: String <- row) {
+                <td>@field</td>
+            }
+            </tr>
+        }
+        </table>
+    }
