@@ -96,4 +96,9 @@ class HomeController @Inject() (cc:MessagesControllerComponents)
     val parsedCsv = operateOnFile(file)
     Ok(views.html.columns(parsedCsv))
   }
+
+  def computeResults(path: String, addressColumns: String) = Action {
+    // TODO: implement
+    Ok(addressColumns) // split it
+  }
 }
