@@ -3,13 +3,22 @@
 @(csvFile: CsvFile)
 
     @main("Select columns") {
-        <table>
-        @for(row: Seq[String] <- csvFile.rows) {
-            <tr>
-            @for(field: String <- row) {
-                <td>@field</td>
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                @for(field: String <- csvFile.header) {
+                    <th scope="col">@field</th>
+                }
+                </tr>
+            </thead>
+            <tbody>
+            @for(row: Seq[String] <- csvFile.rows) {
+                <tr>
+                @for(field: String <- row) {
+                    <td scope="col">@field</td>
+                }
+                </tr>
             }
-            </tr>
-        }
+            </tbody>
         </table>
     }
