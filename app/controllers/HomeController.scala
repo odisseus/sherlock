@@ -16,6 +16,7 @@ import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc._
 import play.core.parsers.Multipart.FileInfo
 import services.{AddressResolutionService, CsvFileParseService, OutputWriterService, RichAddressDictionary}
+import org.zeroturnaround.zip.ZipUtil
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -115,8 +116,14 @@ class HomeController @Inject() (cc:MessagesControllerComponents, rad: RichAddres
     val matchedFile = new File(s"$tmp/$path-matched.csv")
     val unmatchedFile = new File(s"$tmp/$path-unmatched.csv")
 
-    (new OutputWriterService(matchedFile, unmatchedFile)).write(data, resolved)
+    new OutputWriterService(matchedFile, unmatchedFile).write(data, resolved)
 
-    Ok(Seq(matchedFile.getName, unmatchedFile.getName).toString())
+    val resultsFile = new File(s"$tmp/results.zip")
+    ZipUtil.packEntries(Array(matchedFile, unmatchedFile), resultsFile)
+
+    Ok.sendFile(resultsFile, inline = true)
+      .withHeaders(("Cache-control", "max-age=3600"),
+        ("Content-disposition", "attachment; filename=results.zip"),
+        ("Content-typew", "application/x-download"))
   }
 }

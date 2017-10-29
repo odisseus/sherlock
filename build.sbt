@@ -11,3 +11,4 @@ libraryDependencies += ws
 libraryDependencies += guice
 
 libraryDependencies += "com.github.tototoshi" %% "scala-csv" % "1.3.5"
+libraryDependencies += "org.zeroturnaround" % "zt-zip" % "1.6"
