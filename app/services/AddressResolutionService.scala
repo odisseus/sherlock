@@ -31,7 +31,8 @@ class AddressResolutionService @Inject() (
         val matching = upperBound.filter(_._1 == key)
           .orElse(lowerBound.filter(_._1 == key))
         if(matching.isEmpty){
-          openStreetMapService.resolveCoordinates(key).onComplete(tryCoordinates => {
+          val fut = openStreetMapService.resolveCoordinates(row(streetColumnHeader))
+            fut.onComplete(tryCoordinates => {
             if (tryCoordinates.isFailure) {
               logger.error(s"Failed to resolve coordinates: $tryCoordinates")
             } else {

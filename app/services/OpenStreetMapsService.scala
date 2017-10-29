@@ -20,8 +20,12 @@ class OpenStreetMapService @Inject()(ws: WSClient) {
       .addQueryStringParameters("street" -> key)
       .get().map {
       response => {
-        val coordinates = (response.json \ "lat" \ "lon").as[Coordinates]
-        logger.debug(s"Resoled coordinates: $coordinates")
+        Thread.sleep(500)
+        val foo = (response.json)(0)
+        val lat = foo \ "lat"
+        val lon = foo \ "lon"
+        val coordinates = foo.as[Coordinates]
+        logger.debug(s"Resolved coordinates: $coordinates")
         coordinates
       }
     }
