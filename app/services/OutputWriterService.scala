@@ -47,7 +47,7 @@ class OutputWriterService(
 
     val endTime = DateTime.now()
     val summaryWriter = new PrintWriter(summaryFile)
-    summaryWriter.println(s"Time taken: ${Seconds.secondsBetween(startTime, endTime)}")
+    summaryWriter.println(s"Time taken: ${Seconds.secondsBetween(startTime, endTime).getSeconds} seconds")
     summaryWriter.println(s"Finished at ${endTime}")
     summaryWriter.println(s"Matched ${resolvedAddresses.size} entries")
     summaryWriter.println(s"Failed to match ${inputs._2.size - resolvedAddresses.size} entries")
