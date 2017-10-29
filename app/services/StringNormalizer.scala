@@ -1,6 +1,10 @@
 package services
 
+import play.api.Logger
+
 object StringNormalizer {
+
+  private val logger = Logger(this.getClass)
 
   private val replacementTable = "ĄĆĘŁŃÓÖŚÜŹŻ".zip("ACELNOOSUZZ").toList
 
@@ -58,7 +62,7 @@ object StringNormalizer {
     val withoutPrefixes = (thoroughfarePrefixes ++ titlePrefixes).foldLeft(normalized){
       case (str, prefix) => str.replace(prefix, "")
     }.trim
-    println(s"Normalized '$input' to '$withoutPrefixes'")
+    logger.debug(s"Normalized '$input' to '$withoutPrefixes'")
     withoutPrefixes
   }
 
