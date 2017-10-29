@@ -2,19 +2,15 @@ package services
 
 import java.io.File
 
-import com.github.tototoshi.csv.CSVReader
 import model.TerytStreet
 
 
 class TerytStreetDictionary(
-  dataSource: File
-) {
+  val dataSource: File
+) extends CsvDictionary[TerytStreet] {
 
-  def loadAll(): List[TerytStreet] ={
-    val reader = CSVReader.open(dataSource)(CsvFileParseService.csvFormat)
-    val data = reader.allWithHeaders()
-    println(data.size)
-    val result = data.map{ case row => TerytStreet(
+  override val parseRow: Map[String, String] => TerytStreet = row =>
+    TerytStreet(
       voivodeship = row("WOJ").toInt,
       county = row("POW").toInt,
       municipality = row("GMI").toInt,
@@ -25,9 +21,6 @@ class TerytStreetDictionary(
       streetNameMain = row("NAZWA_1"),
       streetNameAdditional = row("NAZWA_2"),
       updatedAt = row("STAN_NA")
-    )}
-    reader.close()
-    result
-  }
+    )
 
 }
