@@ -24,8 +24,30 @@
     <appender-ref ref="STDOUT" />
   </appender>
 
+  <appender name="NORMFILE" class="ch.qos.logback.core.FileAppender">
+    <file>${application.home:-.}/logs/normalizer.log</file>
+    <encoder>
+      <pattern>%date [%level] %message%n%xException</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="RESOLVFILE" class="ch.qos.logback.core.FileAppender">
+    <file>${application.home:-.}/logs/resolver.log</file>
+    <encoder>
+      <pattern>%date [%level] from %logger - %message%n%xException</pattern>
+    </encoder>
+  </appender>
+
   <logger name="play" level="INFO" />
   <logger name="controllers" level="DEBUG" />
+
+  <logger name="services.StringNormalizer" level="DEBUG">
+    <appender-ref ref="NORMFILE" />
+  </logger>
+
+  <logger name="services.AddressResolutionService" level="DEBUG">
+    <appender-ref ref="RESOLVFILE" />
+  </logger>
 
   <root level="WARN">
     <appender-ref ref="ASYNCFILE" />

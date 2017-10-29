@@ -13,5 +13,5 @@ case class TerytStreet(
   streetType: String,
   streetNameMain: String,
   streetNameAdditional: String,
-  updatedAt: String,
+  updatedAt: String
 )

@@ -7,6 +7,9 @@ import javax.inject._
 import akka.stream.IOResult
 import akka.stream.scaladsl._
 import akka.util.ByteString
+import com.github.tototoshi.csv.{CSVReader, CSVWriter}
+import model.AnalysisResults
+import org.joda.time.DateTime
 import play.api._
 import play.api.data.Form
 import play.api.data.Forms._
@@ -14,20 +17,21 @@ import play.api.libs.streams._
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc._
 import play.core.parsers.Multipart.FileInfo
+import services.{AddressResolutionService, CsvFileParseService, OutputWriterService, RichAddressDictionary}
 
 import scala.concurrent.{ExecutionContext, Future}
-import model.CsvFile
-import services.CsvFileParseService
 
 case class FormData(name: String)
 
 /**
- * This controller handles a file upload.
+ * This controller handles damn EVERYTHING.
  */
 @Singleton
-class HomeController @Inject() (cc:MessagesControllerComponents)
+class HomeController @Inject() (cc:MessagesControllerComponents, rad: RichAddressDictionary)
                                (implicit executionContext: ExecutionContext)
   extends MessagesAbstractController(cc) {
+
+  private val tmp = System.getProperty("java.io.tmpdir")
 
   private val logger = Logger(this.getClass)
 
@@ -81,7 +85,7 @@ class HomeController @Inject() (cc:MessagesControllerComponents)
    * @return
    */
   def upload = Action(parse.multipartFormData(handleFilePartAsFile)) { implicit request =>
-    val fileOption = request.body.file("Select file").map {
+    val fileOption = request.body.file("Input file").map {
       case FilePart(key, filename, contentType, file) =>
         logger.info(s"key = ${key}, filename = ${filename}, contentType = ${contentType}, file = $file")
         file
@@ -92,13 +96,38 @@ class HomeController @Inject() (cc:MessagesControllerComponents)
   }
 
   def selectColumns(path: String) = Action { implicit request =>
-    val file = new File(s"/tmp/$path")
+    val file = new File(s"$tmp/$path")
     val parsedCsv = operateOnFile(file)
     Ok(views.html.columns(parsedCsv))
   }
 
-  def computeResults(path: String, addressColumns: String) = Action {
-    // TODO: implement
-    Ok(addressColumns) // split it
+  def computeResults(path: String, selectedColumns: String) = Action {
+    val startTime = DateTime.now
+    val addressColumns = selectedColumns.split(",").toList
+    val addressResolutionService = new AddressResolutionService(rad)
+    /*
+     * At this point the same file is being parsed for the second time.
+     * But then again, this allows to try the same request after the server has crashed
+     */
+    val file = new File(s"$tmp/$path")
+    val reader = CSVReader.open(file)(services.csvFormat)
+    val data = reader.allWithOrderedHeaders()
+    reader.close()
+    val resolved = addressResolutionService.resolveAddresses(data._2, addressColumns)
+
+    val matchedFile = new File(s"$tmp/$path-matched.csv")
+    val unmatchedFile = new File(s"$tmp/$path-unmatched.csv")
+    val summaryFile = new File(s"$tmp/$path-summary.txt")
+
+    (new OutputWriterService(matchedFile, unmatchedFile, summaryFile)).write(data, resolved, startTime)
+
+    val results = AnalysisResults(matchedFile.getName, unmatchedFile.getName, summaryFile.getName)
+
+    Ok(views.html.results(results))
+  }
+
+  def downloadFile(path: String) = Action {
+    val file = new File(s"/$tmp/$path")
+    Ok.sendFile(file)
   }
 }
