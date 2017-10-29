@@ -29,6 +29,8 @@ class HomeController @Inject() (cc:MessagesControllerComponents, rad: RichAddres
                                (implicit executionContext: ExecutionContext)
   extends MessagesAbstractController(cc) {
 
+  private val tmp = System.getProperty("java.io.tmpdir")
+
   private val logger = Logger(this.getClass)
 
   private val csvFileParseService = new CsvFileParseService
@@ -92,7 +94,7 @@ class HomeController @Inject() (cc:MessagesControllerComponents, rad: RichAddres
   }
 
   def selectColumns(path: String) = Action { implicit request =>
-    val file = new File(s"/tmp/$path")
+    val file = new File(s"$tmp/$path")
     val parsedCsv = operateOnFile(file)
     Ok(views.html.columns(parsedCsv))
   }
@@ -104,14 +106,14 @@ class HomeController @Inject() (cc:MessagesControllerComponents, rad: RichAddres
      * At this point the same file is being parsed for the second time.
      * But then again, this allows to try the same request after the server has crashed
      */
-    val file = new File(s"/tmp/$path")
+    val file = new File(s"$tmp/$path")
     val reader = CSVReader.open(file)(services.csvFormat)
     val data = reader.allWithOrderedHeaders()
     reader.close()
     val resolved = addressResolutionService.resolveAddresses(data._2, addressColumns)
 
-    val matchedFile = new File(s"/tmp/$path-matched.csv")
-    val unmatchedFile = new File(s"/tmp/$path-unmatched.csv")
+    val matchedFile = new File(s"$tmp/$path-matched.csv")
+    val unmatchedFile = new File(s"$tmp/$path-unmatched.csv")
 
     (new OutputWriterService(matchedFile, unmatchedFile)).write(data, resolved)
 
