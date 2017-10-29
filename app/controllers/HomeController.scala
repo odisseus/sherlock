@@ -8,6 +8,7 @@ import akka.stream.IOResult
 import akka.stream.scaladsl._
 import akka.util.ByteString
 import com.github.tototoshi.csv.{CSVReader, CSVWriter}
+import model.AnalysisResults
 import play.api._
 import play.api.data.Form
 import play.api.data.Forms._
@@ -117,6 +118,13 @@ class HomeController @Inject() (cc:MessagesControllerComponents, rad: RichAddres
 
     (new OutputWriterService(matchedFile, unmatchedFile)).write(data, resolved)
 
-    Ok(Seq(matchedFile.getName, unmatchedFile.getName).toString())
+    val results = AnalysisResults(matchedFile.getName, unmatchedFile.getName, "foof")
+
+    Ok(views.html.results(results))
+  }
+
+  def downloadFile(path: String) = Action {
+    val file = new File(s"/$tmp/$path")
+    Ok.sendFile(file)
   }
 }

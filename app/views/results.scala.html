@@ -1,0 +1,9 @@
+@import model.AnalysisResults
+
+@(analysisResults: AnalysisResults)
+
+@main("Results") {
+    <p><a href="/download/@{analysisResults.matchedCsvPath}">Matched</a></p>
+    <p><a href="/download/@{analysisResults.unmatchedCsvPath}">Unmatched</a></p>
+    <p><a href="/download/@{analysisResults.summaryPath}">Summary</a></p>
+}
