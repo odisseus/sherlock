@@ -1,10 +1,12 @@
 @(form: Form[controllers.FormData])(implicit request: MessagesRequestHeader)
 
-@main("Address resolver") {
- <p>Upload a CSV file to analyze</p>
-  @helper.form(action = routes.HomeController.upload, 'enctype -> "multipart/form-data") {
-    @helper.inputFile(form("Select file"))
-    @helper.CSRF.formField
-    <input type="submit" id="upload" value="upload file"/>
-  }
-}
+    @main("Address resolver") {
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <h3 class="h3">Upload a CSV file to analyze</h3>
+        </nav>
+        @helper.form(action = routes.HomeController.upload, 'enctype -> "multipart/form-data") {
+            @helper.inputFile(form("Input file"))
+            @helper.CSRF.formField
+            <input type="submit" id="upload" class="btn btn-success" value="Upload"/>
+        }
+    }
