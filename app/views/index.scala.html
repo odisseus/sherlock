@@ -1,6 +1,7 @@
 @(form: Form[controllers.FormData])(implicit request: MessagesRequestHeader)
 
-@main("Welcome to Play") {
+@main("Address resolver") {
+ <p>Upload a CSV file to analyze</p>
   @helper.form(action = routes.HomeController.upload, 'enctype -> "multipart/form-data") {
     @helper.inputFile(form("Select file"))
     @helper.CSRF.formField

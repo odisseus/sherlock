@@ -3,7 +3,10 @@
 @(analysisResults: AnalysisResults)
 
 @main("Results") {
-    <p><a href="/download/@{analysisResults.matchedCsvPath}">Matched</a></p>
-    <p><a href="/download/@{analysisResults.unmatchedCsvPath}">Unmatched</a></p>
-    <p><a href="/download/@{analysisResults.summaryPath}">Summary</a></p>
+    <div>
+        <h1>Analysis results</h1>
+        <p><a href="/download/@{analysisResults.matchedCsvPath}">Entries with matched coordinates</a></p>
+        <p><a href="/download/@{analysisResults.unmatchedCsvPath}">Entries that could not be matched to coordinates</a></p>
+        <p><a href="/download/@{analysisResults.summaryPath}">Processing summary</a></p>
+    </div>
 }
