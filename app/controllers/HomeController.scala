@@ -7,7 +7,7 @@ import javax.inject._
 import akka.stream.IOResult
 import akka.stream.scaladsl._
 import akka.util.ByteString
-import com.github.tototoshi.csv.CSVReader
+import com.github.tototoshi.csv.{CSVReader, CSVWriter}
 import play.api._
 import play.api.data.Form
 import play.api.data.Forms._
@@ -106,8 +106,39 @@ class HomeController @Inject() (cc:MessagesControllerComponents, rad: RichAddres
      */
     val file = new File(s"/tmp/$path")
     val reader = CSVReader.open(file)(services.csvFormat)
-    val data = reader.allWithHeaders()
-    val resolved = addressResolutionService.resolveAddresses(data, addressColumns)
-    Ok(s"Resolved ${resolved.size} rows of ${data.size}")
+    val data = reader.allWithOrderedHeaders()
+    reader.close()
+    val resolved = addressResolutionService.resolveAddresses(data._2, addressColumns)
+
+    val matchedFile = new File(s"/tmp/$path-matched.csv")
+    val unmatchedFile = new File(s"/tmp/$path-unmatched.csv")
+
+    //Remove previous attempts so that the action can be retried after server has crashed
+    Files.deleteIfExists(matchedFile.toPath)
+    Files.deleteIfExists(unmatchedFile.toPath)
+
+    val matchedWriter = CSVWriter.open(matchedFile)
+    val unmatchedWriter = CSVWriter.open(unmatchedFile)
+
+    val matchedHeaders = data._1 :+ "x" :+ "y"
+    val unmatchedHeaders = data._1
+
+    matchedWriter.writeRow(matchedHeaders)
+    unmatchedWriter.writeRow(unmatchedHeaders)
+
+    data._2.zipWithIndex.foreach{ case (row, i) =>
+      resolved.get(i) match{
+        case Some(richAddress) =>
+          val rowWithCoordinates = row + ("x" -> richAddress.geomX) + ("y" -> richAddress.geomY)
+          matchedWriter.writeRow(matchedHeaders.map(rowWithCoordinates.apply))
+        case None =>
+          unmatchedWriter.writeRow(unmatchedHeaders.map(row.apply))
+      }
+    }
+
+    matchedWriter.close()
+    unmatchedWriter.close()
+
+    Ok(Seq(matchedFile.getName, unmatchedFile.getName).toString())
   }
 }
