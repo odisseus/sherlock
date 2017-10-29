@@ -12,7 +12,6 @@ class AddressResolutionService @Inject() (
     inputCsv: List[Map[String, String]],
     selectedColumns: List[String]
   ): Map[Int, RichAddress] = {
-    println(selectedColumns)
     /**
       * It is assumed that the selected columns are always [UL, NR_BUD] in this order.
       * Real input data may have more or fewer columns.

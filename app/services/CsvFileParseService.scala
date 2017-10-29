@@ -2,14 +2,14 @@ package services
 
 import java.io.File
 import com.github.tototoshi.csv.CSVReader
-import model.CsvFile
+import model.CsvTable
 
 class CsvFileParseService {
 
-  def parse(file: File): CsvFile = {
+  def parse(file: File): CsvTable = {
     val reader = CSVReader.open(file)
     val data = reader.all()
-    val result = CsvFile(
+    val result = CsvTable(
       header = data.head,
       rows = data.tail
     )

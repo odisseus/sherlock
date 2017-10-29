@@ -1,13 +1,13 @@
-@import model.CsvFile
+@import model.CsvTable
 
-@(csvFile: CsvFile)
+@(csvTable: CsvTable)
 
 @main("Select columns") {
     <button type="button" id="submitColumns" class="btn btn-success">Click here to submit columns</button>
     <table class="table">
         <thead class="thead-dark">
             <tr>
-            @for(field: String <- csvFile.header) {
+            @for(field: String <- csvTable.header) {
                 <th scope="col">
                     <div class="d-flex justify-content-between">
                         <span>@field</span>
@@ -18,7 +18,7 @@
             </tr>
         </thead>
         <tbody>
-        @for(row: Seq[String] <- csvFile.rows) {
+        @for(row: Seq[String] <- csvTable.rows) {
             <tr>
             @for(field: String <- row) {
                 <td scope="col">@field</td>

@@ -15,7 +15,7 @@ import play.api.libs.streams._
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc._
 import play.core.parsers.Multipart.FileInfo
-import services.{AddressResolutionService, CsvFileParseService, RichAddressDictionary}
+import services.{AddressResolutionService, CsvFileParseService, OutputWriterService, RichAddressDictionary}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -113,31 +113,7 @@ class HomeController @Inject() (cc:MessagesControllerComponents, rad: RichAddres
     val matchedFile = new File(s"/tmp/$path-matched.csv")
     val unmatchedFile = new File(s"/tmp/$path-unmatched.csv")
 
-    //Remove previous attempts so that the action can be retried after server has crashed
-    Files.deleteIfExists(matchedFile.toPath)
-    Files.deleteIfExists(unmatchedFile.toPath)
-
-    val matchedWriter = CSVWriter.open(matchedFile)
-    val unmatchedWriter = CSVWriter.open(unmatchedFile)
-
-    val matchedHeaders = data._1 :+ "x" :+ "y"
-    val unmatchedHeaders = data._1
-
-    matchedWriter.writeRow(matchedHeaders)
-    unmatchedWriter.writeRow(unmatchedHeaders)
-
-    data._2.zipWithIndex.foreach{ case (row, i) =>
-      resolved.get(i) match{
-        case Some(richAddress) =>
-          val rowWithCoordinates = row + ("x" -> richAddress.geomX) + ("y" -> richAddress.geomY)
-          matchedWriter.writeRow(matchedHeaders.map(rowWithCoordinates.apply))
-        case None =>
-          unmatchedWriter.writeRow(unmatchedHeaders.map(row.apply))
-      }
-    }
-
-    matchedWriter.close()
-    unmatchedWriter.close()
+    (new OutputWriterService(matchedFile, unmatchedFile)).write(data, resolved)
 
     Ok(Seq(matchedFile.getName, unmatchedFile.getName).toString())
   }

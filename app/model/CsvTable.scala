@@ -1,6 +1,6 @@
 package model
 
-case class CsvFile(
+case class CsvTable(
   header: List[String],
   rows: List[List[String]]
 )

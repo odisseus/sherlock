@@ -13,13 +13,14 @@ object StringNormalizer {
     "PLAC",
     "OS.",
     "OSIEDLE",
+    "RONDO",
     "RYNEK"
   )
 
   private val titlePrefixes = List(
     "GEN.",
     "GENERALA",
-    "KS.", "BP.",
+    "KS. BP.",
     "KS.",
     "KSIEDZA",
     "BP.",
@@ -28,6 +29,8 @@ object StringNormalizer {
     "ARCYBISKUPA",
     "MARSZ.",
     "MARSZALKA",
+    "MJR.",
+    "MAJORA",
     "POR.",
     "PORUCZNIKA",
     "PROF.",
