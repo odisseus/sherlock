@@ -8,6 +8,4 @@ Run ./run.sh to
 - query epsg.io for PL 2000 coords
 - save in fix.txt, join to final.txt
 
-Run ./analyze.sh to better see the unmached data
-
-Cleanup algorithm is in ./clean.sh
+./analyze.sh was used in the decelopment, not working, leaving just in case
