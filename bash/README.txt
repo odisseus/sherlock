@@ -21,4 +21,6 @@ real	16m37.605s
 user	0m37.256s
 sys	0m24.915s
 
+Results in matched.txt -- 99.68% matching rate.
+
 ./analyze.sh was used in the decelopment, not working, leaving just in case
