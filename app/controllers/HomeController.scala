@@ -7,6 +7,7 @@ import javax.inject._
 import akka.stream.IOResult
 import akka.stream.scaladsl._
 import akka.util.ByteString
+import com.github.tototoshi.csv.CSVReader
 import play.api._
 import play.api.data.Form
 import play.api.data.Forms._
@@ -14,18 +15,17 @@ import play.api.libs.streams._
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc._
 import play.core.parsers.Multipart.FileInfo
+import services.{AddressResolutionService, CsvFileParseService, RichAddressDictionary}
 
 import scala.concurrent.{ExecutionContext, Future}
-import model.CsvFile
-import services.CsvFileParseService
 
 case class FormData(name: String)
 
 /**
- * This controller handles a file upload.
+ * This controller handles damn EVERYTHING.
  */
 @Singleton
-class HomeController @Inject() (cc:MessagesControllerComponents)
+class HomeController @Inject() (cc:MessagesControllerComponents, rad: RichAddressDictionary)
                                (implicit executionContext: ExecutionContext)
   extends MessagesAbstractController(cc) {
 
@@ -97,8 +97,17 @@ class HomeController @Inject() (cc:MessagesControllerComponents)
     Ok(views.html.columns(parsedCsv))
   }
 
-  def computeResults(path: String, addressColumns: String) = Action {
-    // TODO: implement
-    Ok(addressColumns) // split it
+  def computeResults(path: String, selectedColumns: String) = Action {
+    val addressColumns = selectedColumns.split(",").toList
+    val addressResolutionService = new AddressResolutionService(rad)
+    /*
+     * At this point the same file is being parsed for the second time.
+     * But then again, this allows to try the same request after the server has crashed
+     */
+    val file = new File(s"/tmp/$path")
+    val reader = CSVReader.open(file)(services.csvFormat)
+    val data = reader.allWithHeaders()
+    val resolved = addressResolutionService.resolveAddresses(data, addressColumns)
+    Ok(s"Resolved ${resolved.size} rows of ${data.size}")
   }
 }

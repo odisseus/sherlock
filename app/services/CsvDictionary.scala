@@ -10,7 +10,7 @@ trait CsvDictionary[T] {
 
   val parseRow: Map[String, String] => T
 
-  def loadAll(): List[T] ={
+  protected def loadAll(): List[T] ={
     val reader = CSVReader.open(dataSource)
     val data = reader.allWithHeaders()
     val result = data.map(parseRow)
