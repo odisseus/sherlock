@@ -117,7 +117,7 @@ class HomeController @Inject() (cc:MessagesControllerComponents, rad: RichAddres
 
     val matchedFile = new File(s"$tmp/$path-matched.csv")
     val unmatchedFile = new File(s"$tmp/$path-unmatched.csv")
-    val summaryFile = new File(s"$tmp/$path-summary.csv")
+    val summaryFile = new File(s"$tmp/$path-summary.txt")
 
     (new OutputWriterService(matchedFile, unmatchedFile, summaryFile)).write(data, resolved, startTime)
 
