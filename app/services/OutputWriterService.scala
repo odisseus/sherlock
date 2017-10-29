@@ -5,7 +5,7 @@ import java.nio.file.Files
 
 import com.github.tototoshi.csv.CSVWriter
 import model.RichAddress
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, Seconds}
 
 class OutputWriterService(
   matchedFile: File,
@@ -15,7 +15,8 @@ class OutputWriterService(
 
   def write(
     inputs: (scala.List[String], scala.List[Map[String, String]]),
-    resolvedAddresses: Map[Int, RichAddress]
+    resolvedAddresses: Map[Int, RichAddress],
+    startTime: DateTime
   ): Unit ={
     //Remove previous attempts so that the action can be retried after server has crashed
     Files.deleteIfExists(matchedFile.toPath)
@@ -44,9 +45,10 @@ class OutputWriterService(
     matchedWriter.close()
     unmatchedWriter.close()
 
+    val endTime = DateTime.now()
     val summaryWriter = new PrintWriter(summaryFile)
-    summaryWriter.println("Time taken: as long as it took")
-    summaryWriter.println(s"Finished at ${DateTime.now()}")
+    summaryWriter.println(s"Time taken: ${Seconds.secondsBetween(startTime, endTime)}")
+    summaryWriter.println(s"Finished at ${endTime}")
     summaryWriter.println(s"Matched ${resolvedAddresses.size} entries")
     summaryWriter.println(s"Failed to match ${inputs._2.size - resolvedAddresses.size} entries")
     summaryWriter.println(s"Total ${inputs._2.size} entries")

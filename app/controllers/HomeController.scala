@@ -9,6 +9,7 @@ import akka.stream.scaladsl._
 import akka.util.ByteString
 import com.github.tototoshi.csv.{CSVReader, CSVWriter}
 import model.AnalysisResults
+import org.joda.time.DateTime
 import play.api._
 import play.api.data.Form
 import play.api.data.Forms._
@@ -101,6 +102,7 @@ class HomeController @Inject() (cc:MessagesControllerComponents, rad: RichAddres
   }
 
   def computeResults(path: String, selectedColumns: String) = Action {
+    val startTime = DateTime.now
     val addressColumns = selectedColumns.split(",").toList
     val addressResolutionService = new AddressResolutionService(rad)
     /*
@@ -117,7 +119,7 @@ class HomeController @Inject() (cc:MessagesControllerComponents, rad: RichAddres
     val unmatchedFile = new File(s"$tmp/$path-unmatched.csv")
     val summaryFile = new File(s"$tmp/$path-summary.csv")
 
-    (new OutputWriterService(matchedFile, unmatchedFile, summaryFile)).write(data, resolved)
+    (new OutputWriterService(matchedFile, unmatchedFile, summaryFile)).write(data, resolved, startTime)
 
     val results = AnalysisResults(matchedFile.getName, unmatchedFile.getName, summaryFile.getName)
 
