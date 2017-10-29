@@ -1,14 +1,16 @@
 package services
 
-import java.io.File
+import java.io.{File, PrintWriter}
 import java.nio.file.Files
 
 import com.github.tototoshi.csv.CSVWriter
 import model.RichAddress
+import org.joda.time.DateTime
 
 class OutputWriterService(
   matchedFile: File,
-  unmatchedFile: File
+  unmatchedFile: File,
+  summaryFile: File
 ) {
 
   def write(
@@ -18,6 +20,7 @@ class OutputWriterService(
     //Remove previous attempts so that the action can be retried after server has crashed
     Files.deleteIfExists(matchedFile.toPath)
     Files.deleteIfExists(unmatchedFile.toPath)
+    Files.deleteIfExists(summaryFile.toPath)
 
     val matchedWriter = CSVWriter.open(matchedFile)
     val unmatchedWriter = CSVWriter.open(unmatchedFile)
@@ -40,6 +43,15 @@ class OutputWriterService(
 
     matchedWriter.close()
     unmatchedWriter.close()
+
+    val summaryWriter = new PrintWriter(summaryFile)
+    summaryWriter.println("Time taken: as long as it took")
+    summaryWriter.println(s"Finished at ${DateTime.now()}")
+    summaryWriter.println(s"Matched ${resolvedAddresses.size} entries")
+    summaryWriter.println(s"Failed to match ${inputs._2.size - resolvedAddresses.size} entries")
+    summaryWriter.println(s"Total ${inputs._2.size} entries")
+    summaryWriter.close()
+
   }
 
 }
