@@ -11,7 +11,7 @@ trait CsvDictionary[T] {
   val parseRow: Map[String, String] => T
 
   def loadAll(): List[T] ={
-    val reader = CSVReader.open(dataSource)(CsvFileParseService.csvFormat)
+    val reader = CSVReader.open(dataSource)
     val data = reader.allWithHeaders()
     val result = data.map(parseRow)
     reader.close()
