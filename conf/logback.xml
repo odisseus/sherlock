@@ -31,6 +31,13 @@
     </encoder>
   </appender>
 
+  <appender name="OSMFILE" class="ch.qos.logback.core.FileAppender">
+    <file>${application.home:-.}/logs/osm.log</file>
+    <encoder>
+      <pattern>%date [%level] %message%n%xException</pattern>
+    </encoder>
+  </appender>
+
   <appender name="RESOLVFILE" class="ch.qos.logback.core.FileAppender">
     <file>${application.home:-.}/logs/resolver.log</file>
     <encoder>
@@ -47,6 +54,10 @@
 
   <logger name="services.AddressResolutionService" level="DEBUG">
     <appender-ref ref="RESOLVFILE" />
+  </logger>
+
+  <logger name="services.OpenStreetMapService" level="DEBUG">
+    <appender-ref ref="OSMFILE" />
   </logger>
 
   <root level="WARN">
