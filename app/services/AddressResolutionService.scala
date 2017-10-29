@@ -5,8 +5,10 @@ import javax.inject.Inject
 import model.RichAddress
 import play.api.Logger
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class AddressResolutionService @Inject() (
-  richAddressDictionary: RichAddressDictionary
+  richAddressDictionary: RichAddressDictionary, openStreetMapService: OpenStreetMapService
 ) {
 
   private val logger = Logger(this.getClass)
@@ -26,17 +28,27 @@ class AddressResolutionService @Inject() (
         val key = row(streetColumnHeader).normalizeStreetName().split("\\s").last+row(buildingNumberColumnHeader).normalize()
         val upperBound = richAddressDictionary.richAddresses.from(key).headOption
         val lowerBound = richAddressDictionary.richAddresses.to(key).lastOption
-        val matching = (upperBound.filter(_._1 == key))
+        val matching = upperBound.filter(_._1 == key)
           .orElse(lowerBound.filter(_._1 == key))
         if(matching.isEmpty){
-          logger.debug(s"Failed to match '$key', closest options were '${lowerBound.map(_._1)}' and '${upperBound.map(_._1)}'")
+          openStreetMapService.resolveCoordinates(key).onComplete(tryCoordinates => {
+            if (tryCoordinates.isFailure) {
+              logger.error(s"Failed to resolve coordinates: $tryCoordinates")
+            } else {
+              if (tryCoordinates.get.lat.isEmpty) {
+                logger.debug(s"Failed to match '$key', closest options were '${lowerBound.map(_._1)}' and '${upperBound.map(_._1)}'")
+              } else {
+                // TODO: return RichAddress
+              }
+            }
+          })
         }
         matching.map{
           case (addressKey, richAddress) =>
             if(key != addressKey){
               logger.debug(s"Imprecise match: $key to $addressKey")
             }
-            (i -> richAddress)
+            i -> richAddress
         }
     }
     result.toMap

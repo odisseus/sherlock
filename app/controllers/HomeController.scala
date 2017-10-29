@@ -16,7 +16,7 @@ import play.api.libs.streams._
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc._
 import play.core.parsers.Multipart.FileInfo
-import services.{AddressResolutionService, CsvFileParseService, OutputWriterService, RichAddressDictionary}
+import services.{AddressResolutionService, CsvFileParseService, OpenStreetMapService, OutputWriterService, RichAddressDictionary}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -26,7 +26,7 @@ case class FormData(name: String)
  * This controller handles damn EVERYTHING.
  */
 @Singleton
-class HomeController @Inject() (cc:MessagesControllerComponents, rad: RichAddressDictionary)
+class HomeController @Inject() (cc:MessagesControllerComponents, rad: RichAddressDictionary, openStreetMapService: OpenStreetMapService)
                                (implicit executionContext: ExecutionContext)
   extends MessagesAbstractController(cc) {
 
@@ -102,7 +102,7 @@ class HomeController @Inject() (cc:MessagesControllerComponents, rad: RichAddres
 
   def computeResults(path: String, selectedColumns: String) = Action {
     val addressColumns = selectedColumns.split(",").toList
-    val addressResolutionService = new AddressResolutionService(rad)
+    val addressResolutionService = new AddressResolutionService(rad, openStreetMapService)
     /*
      * At this point the same file is being parsed for the second time.
      * But then again, this allows to try the same request after the server has crashed
