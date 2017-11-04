@@ -1,16 +1,17 @@
 package services
 
-import java.io.{File, PrintWriter}
+import java.io.{File, OutputStream, PrintWriter}
 import java.nio.file.Files
 
 import com.github.tototoshi.csv.CSVWriter
 import model.RichAddress
 import org.joda.time.{DateTime, Seconds}
 
+
 class OutputWriterService(
-  matchedFile: File,
-  unmatchedFile: File,
-  summaryFile: File
+  matchedSink: OutputStream,
+  unmatchedSink: OutputStream,
+  summarySink: OutputStream
 ) {
 
   def write(
@@ -18,13 +19,9 @@ class OutputWriterService(
     resolvedAddresses: Map[Int, RichAddress],
     startTime: DateTime
   ): Unit ={
-    //Remove previous attempts so that the action can be retried after server has crashed
-    Files.deleteIfExists(matchedFile.toPath)
-    Files.deleteIfExists(unmatchedFile.toPath)
-    Files.deleteIfExists(summaryFile.toPath)
 
-    val matchedWriter = CSVWriter.open(matchedFile)
-    val unmatchedWriter = CSVWriter.open(unmatchedFile)
+    val matchedWriter = CSVWriter.open(matchedSink)
+    val unmatchedWriter = CSVWriter.open(unmatchedSink)
 
     val matchedHeaders = inputs._1 :+ "x" :+ "y"
     val unmatchedHeaders = inputs._1
@@ -46,7 +43,7 @@ class OutputWriterService(
     unmatchedWriter.close()
 
     val endTime = DateTime.now()
-    val summaryWriter = new PrintWriter(summaryFile)
+    val summaryWriter = new PrintWriter(summarySink)
     summaryWriter.println(s"Time taken: ${Seconds.secondsBetween(startTime, endTime).getSeconds} seconds")
     summaryWriter.println(s"Finished at ${endTime}")
     summaryWriter.println(s"Matched ${resolvedAddresses.size} entries")

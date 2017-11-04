@@ -1,6 +1,6 @@
 package controllers
 
-import java.io.File
+import java.io.{File, InputStreamReader}
 import java.nio.file.{Files, Path}
 import javax.inject._
 
@@ -17,7 +17,7 @@ import play.api.libs.streams._
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc._
 import play.core.parsers.Multipart.FileInfo
-import services.{AddressResolutionService, CsvFileParseService, OutputWriterService, RichAddressDictionary}
+import services.{AddressResolutionService, CsvFileParseService, FileStorage, OutputWriterService, RichAddressDictionary}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,6 +36,8 @@ class HomeController @Inject() (cc:MessagesControllerComponents, rad: RichAddres
   private val logger = Logger(this.getClass)
 
   private val csvFileParseService = new CsvFileParseService
+
+  private val fileStorage = new FileStorage(tmp)
 
   val form = Form(
     mapping(
@@ -109,19 +111,25 @@ class HomeController @Inject() (cc:MessagesControllerComponents, rad: RichAddres
      * At this point the same file is being parsed for the second time.
      * But then again, this allows to try the same request after the server has crashed
      */
-    val file = new File(s"$tmp/$path")
-    val reader = CSVReader.open(file)(services.csvFormat)
-    val data = reader.allWithOrderedHeaders()
-    reader.close()
+    val data = fileStorage.readingFromFile(path){ source =>
+      val reader = CSVReader.open(new InputStreamReader(source))(services.csvFormat)
+      reader.allWithOrderedHeaders()
+    }
     val resolved = addressResolutionService.resolveAddresses(data._2, addressColumns)
 
-    val matchedFile = new File(s"$tmp/$path-matched.csv")
-    val unmatchedFile = new File(s"$tmp/$path-unmatched.csv")
-    val summaryFile = new File(s"$tmp/$path-summary.txt")
+    val matchedFilename = s"$path-matched.csv"
+    val unmatchedFilename = s"$path-unmatched.csv"
+    val summaryFilename = s"$path-summary.txt"
 
-    (new OutputWriterService(matchedFile, unmatchedFile, summaryFile)).write(data, resolved, startTime)
+    fileStorage.writingToFile(matchedFilename){ matchedSink =>
+      fileStorage.writingToFile(unmatchedFilename) { unmatchedSink =>
+        fileStorage.writingToFile(summaryFilename) { summarySink =>
+          (new OutputWriterService(matchedSink, unmatchedSink, summarySink)).write(data, resolved, startTime)
+        }
+      }
+    }
 
-    val results = AnalysisResults(matchedFile.getName, unmatchedFile.getName, summaryFile.getName)
+    val results = AnalysisResults(matchedFilename, unmatchedFilename, summaryFilename)
 
     Ok(views.html.results(results))
   }
