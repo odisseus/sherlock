@@ -23,13 +23,10 @@ class AddressResolutionService @Inject() (
     val buildingNumberColumnHeader = selectedColumns(1)
     val result = inputCsv.zipWithIndex.flatMap{
       case (row, i) =>
-        val key = row(streetColumnHeader).normalizeStreetName().split("\\s").last+row(buildingNumberColumnHeader).normalize()
-        val upperBound = richAddressDictionary.richAddresses.from(key).headOption
-        val lowerBound = richAddressDictionary.richAddresses.to(key).lastOption
-        val matching = (upperBound.filter(_._1 == key))
-          .orElse(lowerBound.filter(_._1 == key))
+        val key = row(streetColumnHeader).normalizeStreetName() + "|" +row(buildingNumberColumnHeader).normalize()
+        val matching = richAddressDictionary.richAddresses.find(_._1.contains(key))
         if(matching.isEmpty){
-          logger.debug(s"Failed to match '$key', closest options were '${lowerBound.map(_._1)}' and '${upperBound.map(_._1)}'")
+          logger.debug(s"Failed to match '$key'")
         }
         matching.map{
           case (addressKey, richAddress) =>
@@ -41,5 +38,5 @@ class AddressResolutionService @Inject() (
     }
     result.toMap
   }
-
+  
 }

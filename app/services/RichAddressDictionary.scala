@@ -20,7 +20,7 @@ class RichAddressDictionary extends CsvDictionary[RichAddress] {
   lazy val richAddresses: SortedMap[String, RichAddress] = {
     val data = this.loadAll()
     val withKeys = data.map{
-      case address => (address.nameMain+address.number, address)
+      case address => (address.street.normalizeStreetName()+"|" + address.number, address)
     }
     SortedMap.empty[String, RichAddress] ++ withKeys
   }

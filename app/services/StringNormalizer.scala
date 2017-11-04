@@ -8,6 +8,7 @@ object StringNormalizer {
 
   private val replacementTable = "ĄĆĘŁŃÓÖŚÜŹŻ".zip("ACELNOOSUZZ").toList
 
+  // FIXME There's a street called "OSIEDLE". Normalizing it leaves only whitespace
   private val thoroughfarePrefixes = List(
     "AL.",
     "ALEJA",
@@ -61,9 +62,16 @@ object StringNormalizer {
     val normalized = normalize(input)
     val withoutPrefixes = (thoroughfarePrefixes ++ titlePrefixes).foldLeft(normalized){
       case (str, prefix) => str.replace(prefix, "")
-    }.trim
-    logger.debug(s"Normalized '$input' to '$withoutPrefixes'")
-    withoutPrefixes
+    }
+    val withoutInitials = withoutPrefixes
+      .replaceAll("""[A-Z]\.""", "")
+
+    val result = withoutInitials.trim
+    logger.debug(s"Normalized '$input' to '$result'")
+    if(result.length <= 3){
+      logger.warn(s"Normalisation result is very short: '$input' to '$result'")
+    }
+    result
   }
 
 }
