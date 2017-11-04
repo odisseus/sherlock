@@ -24,19 +24,29 @@ class AddressResolutionService @Inject() (
     val result = inputCsv.zipWithIndex.flatMap{
       case (row, i) =>
         val key = row(streetColumnHeader).normalizeStreetName() + "|" +row(buildingNumberColumnHeader).normalize()
-        val matching = richAddressDictionary.richAddresses.find(_._1.contains(key))
+        val x = row(streetColumnHeader).normalizeStreetName()
+        val y = row(buildingNumberColumnHeader).toUpperCase().replaceAll("""\s""", "")
+        val matching = richAddressDictionary.richAddresses.find { case (key, address) =>
+          isMatching(address,x, y)
+        }
         if(matching.isEmpty){
           logger.debug(s"Failed to match '$key'")
         }
         matching.map{
           case (addressKey, richAddress) =>
             if(key != addressKey){
-              logger.debug(s"Imprecise match: $key to $addressKey")
+              logger.warn(s"Imprecise match: $key to $addressKey")
             }
             (i -> richAddress)
         }
     }
     result.toMap
   }
-  
+
+  def isMatching(address: RichAddress, streetName: String, buildingNumber: String) = {
+    buildingNumber == address.number &&
+      streetName.contains(address.nameMain) &&
+    address.street.contains(streetName)
+  }
+
 }
