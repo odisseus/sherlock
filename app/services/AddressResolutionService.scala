@@ -9,7 +9,8 @@ class AddressResolutionService @Inject() (
   richAddressDictionary: RichAddressDictionary
 ) {
 
-  private val logger = Logger(this.getClass)
+  private val loggerImprecise = Logger("resolver-imprecise")
+  private val loggerFailed = Logger("resolver-failed")
 
   def resolveAddresses(
     inputCsv: List[Map[String, String]],
@@ -30,12 +31,12 @@ class AddressResolutionService @Inject() (
           isMatching(address,x, y)
         }
         if(matching.isEmpty){
-          logger.debug(s"Failed to match '$key'")
+          loggerFailed.debug(s"Failed to match '$key'")
         }
         matching.map{
           case (addressKey, richAddress) =>
             if(key != addressKey){
-              logger.warn(s"Imprecise match: $key to $addressKey")
+              loggerImprecise.debug(s"Imprecise match: $key to $addressKey")
             }
             (i -> richAddress)
         }

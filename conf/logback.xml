@@ -31,10 +31,17 @@
     </encoder>
   </appender>
 
-  <appender name="RESOLVFILE" class="ch.qos.logback.core.FileAppender">
-    <file>${application.home:-.}/logs/resolver.log</file>
+  <appender name="RESOLVFILE-IMPRECISE" class="ch.qos.logback.core.FileAppender">
+    <file>${application.home:-.}/logs/resolver-imprecise.log</file>
     <encoder>
-      <pattern>%date [%level] from %logger - %message%n%xException</pattern>
+      <pattern>%date [%level] - %message%n%xException</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="RESOLVFILE-FAILED" class="ch.qos.logback.core.FileAppender">
+    <file>${application.home:-.}/logs/resolver-failed.log</file>
+    <encoder>
+      <pattern>%date [%level] - %message%n%xException</pattern>
     </encoder>
   </appender>
 
@@ -45,8 +52,12 @@
     <appender-ref ref="NORMFILE" />
   </logger>
 
-  <logger name="services.AddressResolutionService" level="DEBUG">
-    <appender-ref ref="RESOLVFILE" />
+  <logger name="resolver-imprecise" level="DEBUG">
+    <appender-ref ref="RESOLVFILE-IMPRECISE" />
+  </logger>
+
+  <logger name="resolver-failed" level="DEBUG">
+    <appender-ref ref="RESOLVFILE-FAILED" />
   </logger>
 
   <root level="WARN">
